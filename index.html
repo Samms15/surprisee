@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Surprise sayangggg!</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive;
+      text-align: center;
+      background-color: #000;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+    }
+
+    .container {
+      padding: 40px;
+      border-radius: 20px;
+    }
+
+    .photo {
+      max-width: 250px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #ff69b4;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .photo:hover {
+      transform: scale(1.05);
+    }
+
+    .message-box {
+      display: none;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #00ffcc;
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      font-size: 1.2em;
+      animation: popIn 1s ease;
+      max-width: 300px;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    #popupMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ff69b4;
+      color: white;
+      padding: 30px 50px;
+      border-radius: 15px;
+      font-size: 1.5em;
+      box-shadow: 0 0 20px #ff69b4;
+      z-index: 1000;
+      display: none;
+    }
+
+    #paper {
+      background: white;
+      color: black;
+      width: 80vw;
+      max-width: 600px;
+      height: 300px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+      padding: 30px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.2em;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      position: relative;
+      text-align: left;
+      display: none;
+    }
+
+    #cursor {
+      display: inline-block;
+      width: 10px;
+      background-color: black;
+      animation: blink 1s step-start 0s infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      50% { background-color: transparent; }
+    }
+
+    #pageNumber {
+      margin-top: 10px;
+      font-size: 1.2em;
+      color: white;
+      user-select: none;
+    }
+
+    #navigation {
+      margin-top: 15px;
+      display: none;
+    }
+
+    #navigation button {
+      background-color: #ff69b4;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #navigation button:disabled {
+      background-color: #aa5079;
+      cursor: default;
+    }
+
+    #navigation button:hover:not(:disabled) {
+      background-color: #ff85c1;
+    }
+
+    /* Hujan hati */
+    .heart {
+      position: fixed;
+      top: -20px;
+      width: 20px;
+      height: 20px;
+      background-color: #ff69b4;
+      transform: rotate(45deg);
+      animation: fall 3s linear infinite;
+      z-index: 999;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ff69b4;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: -10px;
+      top: 0;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-20px) rotate(45deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(45deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="content">
+    <h2 id="title" style="color:white;">Klik fotonya ya! 🌟</h2>
+    <img src="foto.jpg" alt="Foto Lucu" class="photo" id="photo" />
+  </div>
+
+  <div id="popupMessage">Haloo sayangg akuu punyaaa cecuatuuuu 💖 (5 detik)</div>
+
+  <div id="paper"></div>
+  <div id="pageNumber"></div>
+
+  <div id="navigation">
+    <button id="prevBtn" disabled>Prev</button>
+    <button id="nextBtn" disabled>Next</button>
+  </div>
+
+  <audio id="click-sound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+  <audio id="bg-music" src="lagu.mp3" loop preload="auto"></audio>
+
+  <script>
+    const photo = document.getElementById('photo');
+    const content = document.getElementById('content');
+    const popup = document.getElementById('popupMessage');
+    const paper = document.getElementById('paper');
+    const pageNumber = document.getElementById('pageNumber');
+    const navigation = document.getElementById('navigation');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const clickSound = document.getElementById('click-sound');
+    const bgMusic = document.getElementById('bg-music');
+
+    const pages = [
+      `Sayanggnyaa akuuuu, haloooowwww cantikkkkk, dedeee, dedeee sudaa bobooo cantikkk yaa sayanggggg 🥺💕\n\nImm sollyy sayanggg baruu membuat sweet textt agii untukk dedee 😢`,
+      `Dedee sayanggg, akuuu mauuu banyakk banyakk bersyukur samaaa Tuhannnn, karnaa udaa pertemuinnnn kitaaaa, akuuu sangattt bersyukurrrr bisaaa bersama samaa barengg dede sayanggg...`,
+      `sayanggnyaa akuuuu, maafinnn akuuu yaaa sayanggg, akuu akhir akhirr inii selaluuu moodswinggg, kadangg akuuu bawaaannya cemas terusss 😢 ituu karenaa yang kemarinn kitaa obrolinnn...`,
+      `tapii yaa sayangggg, walau akuuu lagiii banyakkk pikiran, walauu akuu belumm kuliahhh dan lagii prosess nyiapinn semuanya pelan pelannn, dedeee selalu jadi alesann kenapaa akuuu mau terusss majuuu 💞`,
+      `dedee semangatt akuuu, dedeee tuh motivasii terbesar akuuu, akuuu pengenn bangettt sukses buat dedee, pengenn bahagiain dedee nantiii, pelan pelann kitaa jalanii proses ini barengg barenggg 🤍`,
+      `akuuu pelan pelan yaa sayangg, sambil terus doaaa, sambil terus usahaaa, biar nantiii masa depann kitaa lebih indahhh, tanpa tekanan kayaa sekarangg, tapi samaa dedee kita bangun sama samaaa`,
+      `akuuu jugaaa sayangggg, sering bayangin masa depann kitaaa... bayanginn dedee jadi istrii akuuu, yang tiap pagi aku liat senyummnyaaa pas bangun tidur, sarapann barengg, beres-beres rumah sambil becandainn dedee 🏡💗`,
+      `akuu pengennn bangettt aminin dedee suatuu hariii, pas semuanya uda siappp, biar cinta kitaa dijaga sama Tuhannn 💍 hari pernikahann kitaa pasti bakal jadi hariii paling bahagiaaa buat akuuu...`,
+      `dan setelah nikahhh, akuuu pengenn bangett hidup sederhanaa tapi bahagiaa sama dedeee... punya rumah kecil yang seluu, isi rumahnya penuhh tawa dan pelukk, mungkin pelan pelan nanti punya babyyu juga awww...`,
+      `akuu sayangg bangettt sama dedeee... dan akuuu seriusss, akuuu niatt, akuuu cinta, bukan buat sekarang ajaa tapi buat selamanyaaa 🥹💞`
+    ];
+
+    let currentPage = 0;
+    let firstPopupShown = false;
+
+    photo.addEventListener('click', () => {
+      clickSound.play();
+      content.style.display = 'none';
+
+      if (!firstPopupShown) {
+        showPopupThenPage(currentPage);
+        firstPopupShown = true;
+      } else {
+        showPage(currentPage);
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    });
+
+    function showPopupThenPage(pageIndex) {
+      paper.style.display = 'none';
+      navigation.style.display = 'none';
+      popup.style.display = 'block';
+      let countdown = 5;
+      popup.textContent = `Haloo sayangg akuu punyaaa cecuatuuuu💖 
+      (${countdown} detik)`;
+
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        popup.textContent = `Haloo sayangg akuu punyaaa cecuatuuuu 💖 
+        (${countdown} detik)`;
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          popup.style.display = 'none';
+          paper.style.display = 'block';
+          bgMusic.play().catch(() => console.log("Autoplay ditolak"));
+          showPage(pageIndex);
+        }
+      }, 1000);
+    }
+
+    function showPage(pageIndex) {
+      popup.style.display = 'none';
+      paper.style.display = 'block';
+      navigation.style.display = 'none';
+      pageNumber.textContent = `${pageIndex + 1} / ${pages.length}`;
+
+      prevBtn.disabled = pageIndex === 0;
+      nextBtn.disabled = true;
+
+      startTyping(pages[pageIndex], paper, () => {
+        if (pageIndex === pages.length - 1) {
+          navigation.style.display = 'block';
+          prevBtn.disabled = false;
+          nextBtn.disabled = true;
+        } else {
+          setTimeout(() => {
+            currentPage++;
+            showPage(currentPage);
+          }, 2000);
+        }
+      });
+    }
+
+    function startTyping(text, element, callback) {
+      let i = 0;
+      element.innerHTML = '';
+      const cursor = document.createElement('span');
+      cursor.id = 'cursor';
+      element.appendChild(cursor);
+
+      const heartInterval = setInterval(createHeart, 300);
+
+      function typing() {
+        if (i < text.length) {
+          cursor.insertAdjacentText('beforebegin', text.charAt(i));
+          i++;
+          setTimeout(typing, 100);
+        } else {
+          cursor.remove();
+          clearInterval(heartInterval);
+          if (callback) callback();
+        }
+      }
+      typing();
+    }
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 5000);
+    }
+  </script>
+</body>
+</html>
